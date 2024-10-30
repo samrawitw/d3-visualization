@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Chart with D3.js</title>
+    <title>Informative Bar Chart with D3.js</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -12,6 +13,7 @@
         }
         svg {
             background-color: #f0f0f0;
+            margin-top: 20px;
         }
         .bar {
             fill: steelblue;
@@ -23,54 +25,95 @@
             font-size: 12px;
             font-weight: bold;
         }
+        .data-label {
+            fill: black;
+            font-size: 10px;
+            text-anchor: middle;
+        }
     </style>
 </head>
 <body>
-    <h1>D3.js Bar Chart Example</h1>
-    <svg id="bar-chart" width="500" height="300"></svg>
+    <h1>Monthly Data Overview: D3.js Bar Chart</h1>
+    <svg id="bar-chart" width="600" height="400"></svg>
 
     <script>
-        // Data to visualize
+        // Data to visualize (Monthly values example)
         const data = [30, 86, 168, 281, 303, 365];
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
         // Define the SVG canvas dimensions
         const svg = d3.select("#bar-chart");
         const width = +svg.attr("width");
         const height = +svg.attr("height");
+        const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
+
+        // Create a group element to position the chart properly within margins
+        const chart = svg.append("g")
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
         // Create scaling functions
         const xScale = d3.scaleBand()
-            .domain(data.map((d, i) => i)) // Index of each data point
-            .range([0, width])
-            .padding(0.1); // Padding between bars
+            .domain(months)
+            .range([0, chartWidth])
+            .padding(0.1);
 
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(data)]) // Data range
-            .range([height, 0]); // SVG height range (invert for chart)
+            .domain([0, d3.max(data)])
+            .nice() // Make the axis end on a round number
+            .range([chartHeight, 0]);
 
-        // Add bars to the SVG
-        svg.selectAll(".bar")
+        // Add bars to the chart
+        chart.selectAll(".bar")
             .data(data)
             .enter()
             .append("rect")
             .attr("class", "bar")
-            .attr("x", (d, i) => xScale(i))
+            .attr("x", (d, i) => xScale(months[i]))
             .attr("y", d => yScale(d))
             .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(d));
+            .attr("height", d => chartHeight - yScale(d));
+
+        // Add data labels on top of each bar
+        chart.selectAll(".data-label")
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("class", "data-label")
+            .attr("x", (d, i) => xScale(months[i]) + xScale.bandwidth() / 2)
+            .attr("y", d => yScale(d) - 5)
+            .text(d => d);
 
         // Add X-axis
-        svg.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(xScale).tickFormat((d, i) => `Item ${i + 1}`))
+        chart.append("g")
+            .attr("transform", `translate(0, ${chartHeight})`)
+            .call(d3.axisBottom(xScale))
             .selectAll("text")
             .attr("class", "axis-label");
 
         // Add Y-axis
-        svg.append("g")
-            .call(d3.axisLeft(yScale))
+        chart.append("g")
+            .call(d3.axisLeft(yScale).ticks(6))
             .selectAll("text")
             .attr("class", "axis-label");
+
+        // Add X-axis title
+        chart.append("text")
+            .attr("class", "axis-label")
+            .attr("x", chartWidth / 2)
+            .attr("y", chartHeight + 40)
+            .attr("text-anchor", "middle")
+            .text("Months");
+
+        // Add Y-axis title
+        chart.append("text")
+            .attr("class", "axis-label")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -chartHeight / 2)
+            .attr("y", -35)
+            .attr("text-anchor", "middle")
+            .text("Values");
     </script>
 </body>
 </html>
