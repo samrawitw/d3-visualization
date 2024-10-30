@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Chart with D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        svg {
+            background-color: #f0f0f0;
+        }
+        .bar {
+            fill: steelblue;
+        }
+        .bar:hover {
+            fill: orange;
+        }
+        .axis-label {
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>D3.js Bar Chart Example</h1>
+    <svg id="bar-chart" width="500" height="300"></svg>
+
+    <script>
+        // Data to visualize
+        const data = [30, 86, 168, 281, 303, 365];
+
+        // Define the SVG canvas dimensions
+        const svg = d3.select("#bar-chart");
+        const width = +svg.attr("width");
+        const height = +svg.attr("height");
+
+        // Create scaling functions
+        const xScale = d3.scaleBand()
+            .domain(data.map((d, i) => i)) // Index of each data point
+            .range([0, width])
+            .padding(0.1); // Padding between bars
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(data)]) // Data range
+            .range([height, 0]); // SVG height range (invert for chart)
+
+        // Add bars to the SVG
+        svg.selectAll(".bar")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", d => yScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d));
+
+        // Add X-axis
+        svg.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(xScale).tickFormat((d, i) => `Item ${i + 1}`))
+            .selectAll("text")
+            .attr("class", "axis-label");
+
+        // Add Y-axis
+        svg.append("g")
+            .call(d3.axisLeft(yScale))
+            .selectAll("text")
+            .attr("class", "axis-label");
+    </script>
+</body>
+</html>
