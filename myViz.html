@@ -1,10 +1,12 @@
 
- <!DOCTYPE html>
+
+    
+      <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informative Bar Chart with D3.js</title>
+    <title>Interactive Bar Chart with D3.js</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -33,7 +35,7 @@
     </style>
 </head>
 <body>
-    <h1>Monthly Data Overview: D3.js Bar Chart</h1>
+    <h1>Interactive D3.js Bar Chart</h1>
     <svg id="bar-chart" width="600" height="400"></svg>
 
     <script>
@@ -61,29 +63,36 @@
 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(data)])
-            .nice() // Make the axis end on a round number
+            .nice()
             .range([chartHeight, 0]);
 
-        // Add bars to the chart
+        // Add bars with transitions
         chart.selectAll(".bar")
             .data(data)
             .enter()
             .append("rect")
             .attr("class", "bar")
             .attr("x", (d, i) => xScale(months[i]))
-            .attr("y", d => yScale(d))
+            .attr("y", chartHeight) // Start from bottom
             .attr("width", xScale.bandwidth())
-            .attr("height", d => chartHeight - yScale(d));
+            .attr("height", 0) // Start with height 0
+            .transition() // Add transition effect
+            .duration(1000) // Animation duration: 1 second
+            .attr("y", d => yScale(d)) // Final Y position
+            .attr("height", d => chartHeight - yScale(d)); // Final height
 
-        // Add data labels on top of each bar
+        // Add data labels with transitions
         chart.selectAll(".data-label")
             .data(data)
             .enter()
             .append("text")
             .attr("class", "data-label")
             .attr("x", (d, i) => xScale(months[i]) + xScale.bandwidth() / 2)
-            .attr("y", d => yScale(d) - 5)
-            .text(d => d);
+            .attr("y", chartHeight) // Start from bottom
+            .text(d => d)
+            .transition()
+            .duration(1000)
+            .attr("y", d => yScale(d) - 5); // Position just above bars
 
         // Add X-axis
         chart.append("g")
